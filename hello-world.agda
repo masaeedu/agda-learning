@@ -1,5 +1,8 @@
 module hello-world where
 
+-- import Relation.Binary.PropositionalEquality as Eq
+-- open Eq using (_≡_; refl)
+
 data ℕ : Set where
   zero : ℕ
   suc : ℕ → ℕ
@@ -119,10 +122,13 @@ recordTest  = record { first = zero; second = zero }
 ⊥-elim‵′ : {A : Set} → ⊥ → A
 ⊥-elim‵′ ∀x:⊥→-- = ⊥-elim ∀x:⊥→--
 
--- An approach I bungled together for halving even numbers based on the earlier even proof stuff
-halve₀ : (n : ℕ) { _ : n even } → ℕ
+-- A weird slapdash approach for halving even numbers based on the earlier even proof stuff
+halve₀ : ∀ n { proof : n even } → ℕ
 halve₀ zero = zero
-halve₀ (suc (suc n)) { STEP n-even } = halve₀ n { n-even }
+halve₀ (suc (suc n)) { STEP n-even } = suc (halve₀ n { n-even })
+
+testHalve₀ : ℕ
+testHalve₀ = halve₀ (suc (suc zero)) { proof = STEP ZERO }
 
 -- A different approach using a predicate
 isEven : ℕ → Set
@@ -130,6 +136,9 @@ isEven zero = ⊤
 isEven (suc zero) = ⊥
 isEven (suc (suc n)) = isEven n
 
-halve₁ : ∀ n { _ : isEven n } → ℕ
+halve₁ : ∀ n { proof : isEven n } → ℕ
 halve₁ zero = zero
-halve₁ (suc (suc n)) { n-even } = halve₁ n { n-even }
+halve₁ (suc (suc n)) { n-even } = suc (halve₁ n { n-even })
+
+testHalve₁ : ℕ
+testHalve₁ = halve₁ (suc (suc zero)) { proof = tt }
