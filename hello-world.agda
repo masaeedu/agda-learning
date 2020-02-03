@@ -138,7 +138,53 @@ isEven (suc (suc n)) = isEven n
 
 halve₁ : ∀ n { proof : isEven n } → ℕ
 halve₁ zero = zero
-halve₁ (suc (suc n)) { n-even } = suc (halve₁ n { n-even })
+halve₁ (suc (suc n)) { proof } = suc (halve₁ n { proof })
 
 testHalve₁ : ℕ
 testHalve₁ = halve₁ (suc (suc zero)) { proof = tt }
+
+-- Ok, so then in the Type families and Unification section they end up defining the _even data type we had above
+-- and showing how to define what is basically halve₀
+
+data Vec (A : Set) : ℕ → Set where
+  [] : Vec A zero
+  _∷_ : ∀ { n } → A → Vec A n → Vec A (suc n)
+
+-- Can't do this for lists
+-- head₀ : ∀ { A } → List A → A
+-- head₀ []       = {!!}
+-- head₀ (a ∷ as) = a
+
+-- Can do it for Vec
+head : ∀ { A n } → Vec A (suc n) → A
+head (a ∷ _) = a
+
+-- List concatenation
+_++_ : ∀ { A } → List A → List A → List A
+[] ++ xs = xs
+(x ∷ xs) ++ ys = x ∷ (xs ++ ys)
+
+_++v_ : ∀ { A n m } → Vec A n → Vec A m → Vec A (n + m)
+[] ++v xs = xs
+(x ∷ xs) ++v ys = x ∷ (xs ++v ys)
+
+-- Gross n - m that tries to work for m > n
+infix 6 _-_
+_-_ : ℕ → ℕ → ℕ
+zero  - _     = zero
+suc n - zero  = suc n
+suc n - suc m = n - m
+
+-- A number n is less than another number m if …
+data _≤_ : ℕ → ℕ → Set where
+  z≤n : ∀ { m }           → zero  ≤ m     -- n is zero, or …
+  s≤s : ∀ { n m } → n ≤ m → suc n ≤ suc m -- n = suc n′, m = suc m′, and n′ ≤ m′
+
+-- Nice subtract that simply rejects usage unless m ≤ n
+sub₀ : ∀ n m { _ : m ≤ n } → ℕ
+sub₀ n       _       { z≤n }     = n
+sub₀ (suc n) (suc m) { s≤s m≤n } = sub₀ n m { m≤n }
+
+infix 4 _≡_
+data _≡_ { A : Set } (x : A) : A → Set where
+  refl : x ≡ x
