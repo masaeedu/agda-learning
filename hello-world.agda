@@ -188,3 +188,5 @@ sub₀ (suc n) (suc m) { s≤s m≤n } = sub₀ n m { m≤n }
 infix 4 _≡_
 data _≡_ { A : Set } (x : A) : A → Set where
   refl : x ≡ x
+
+-- TODO: Understand why I can't write that equality type by explicitly quantifying over the last variable
