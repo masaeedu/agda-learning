@@ -143,7 +143,7 @@ halve₁ (suc (suc n)) { proof } = suc (halve₁ n { proof })
 testHalve₁ : ℕ
 testHalve₁ = halve₁ (suc (suc zero)) { proof = tt }
 
--- Ok, so then in the Type families and Unification section they end up defining the _even data type we had above
+-- Ok, so then in the Type families and Unification section they end up defining the _even *indexed* data type we had above
 -- and showing how to define what is basically halve₀
 
 data Vec (A : Set) : ℕ → Set where
@@ -189,4 +189,21 @@ infix 4 _≡_
 data _≡_ { A : Set } (x : A) : A → Set where
   refl : x ≡ x
 
+foo : suc zero ≡ suc (suc zero) - suc zero
+foo = refl
+
 -- TODO: Understand why I can't write that equality type by explicitly quantifying over the last variable
+
+-- I guess there's a simpler version of this.
+
+-- Before we had:
+-- data Id (A : Set) : Set where
+--   pack : A → Id A
+
+-- but suppose we instead write it as an "indexed datatype"
+
+data Id₁ : Set → Set where
+  pack₁ : ∀ { A } → A → Id₁ A
+
+-- is that the same thing?
+-- TODO: Find the answer
