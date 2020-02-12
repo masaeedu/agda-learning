@@ -207,3 +207,8 @@ data Id₁ : Set → Set where
 
 -- is that the same thing?
 -- TODO: Find the answer
+--
+-- @monoidmusician provided an example of modeling any other indexed data type using the equality type (which can be viewed as the "fundamental" indexed type)
+data Even' (n : ℕ) : Set where
+  ezero' : n ≡ zero → Even' n
+  e2succ' : { m : ℕ } → n ≡ suc (suc m) → Even' m → Even' n
