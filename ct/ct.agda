@@ -3,33 +3,40 @@ module ct.ct where
 open import Agda.Primitive
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
-record relation (a : Set) (b : Set) : Set₁ where
+record relation (a b : Set) : Set₁ where
   infix 4 _~_
 
   field
     _~_ : a → b → Set
 
+proprel : { a : Set } → relation a a
+proprel = record { _~_ = _≡_ }
+
+funrel : { a b : Set } → relation (a → b) (a → b)
+funrel = record { _~_ = λ f g → ∀ { x } → f x ≡ g x }
+
 record equivalence (a : Set) : Set₁ where
   field
-    {{rel}} : relation a a
+    ⦃ rel ⦄ : relation a a 
 
-  open relation rel
+  open relation rel public
 
   field
     reflexivity  : ∀ { x : a } → x ~ x
     symmetry     : ∀ { x y : a } → x ~ y → y ~ x
     transitivity : ∀ { x y z : a } → y ~ z → x ~ y → x ~ z
 
-open equivalence
+open equivalence ⦃ ... ⦄ public
 
-propeq : ∀ { a : Set } → equivalence a
+propeq : ∀ { a } → equivalence a
 propeq = record
-  { rel = record { _~_ = _≡_ }
-  ; reflexivity = refl
+  { reflexivity = refl
   ; symmetry = symm
   ; transitivity = trans
   }
   where
+  instance p = proprel
+
   symm : { x : Set } { a b : x } → a ≡ b → b ≡ a
   symm refl = refl
 
@@ -39,34 +46,33 @@ propeq = record
 exteq : ∀ { a b : Set } → equivalence (a → b)
 exteq = record
   { rel = record { _~_ = _~_ }
-  ; reflexivity = refl
-  ; symmetry = symm
-  ; transitivity = trans
+  ; reflexivity = reflexivity -- λ { f } { x } → refl
+  ; symmetry = symmetry
+  ; transitivity = transitivity
   }
   where
-  _~_ : { a b : Set } → (a → b) → (a → b) → Set
-  _~_ f g = ∀ { x } → f x ≡ g x
+  instance
+    fr = funrel
+    pe = propeq
 
-  symm : { a b : Set } { f g : a → b } → f ~ g → g ~ f
-  symm e { x } = symmetry propeq (e { x })
-
-  trans : { a b : Set } { f g h : a → b } → g ~ h → f ~ g → f ~ h
-  trans gh fg { x } = transitivity propeq (gh { x }) (fg { x })
-
-record cat { k : Set₁ } (_⇒_ : k → k → Set) (eq : ∀ { a b : k } → equivalence (a ⇒ b)) : Set₁
+record category { k : Set₁ } (_⇒_ : k → k → Set) : Set₁
   where
   field
     id  : { a : k } → a ⇒ a
     _∘_ : { a b c : k } → b ⇒ c → a ⇒ b → a ⇒ c
 
-    lunit : ∀ { a b }     { x : a ⇒ b }                             → relation._~_ (rel eq) (id ∘ x) x
-    runit : ∀ { a b }     { x : a ⇒ b }                             → relation._~_ (rel eq) (x ∘ id) x
-    assoc : ∀ { a b c d } { x : c ⇒ d } { y : b ⇒ c } { z : a ⇒ b } → relation._~_ (rel eq) (x ∘ (y ∘ z)) ((x ∘ y) ∘ z)
+  field
+   ⦃ hom ⦄ : { a b : k } → equivalence (a ⇒ b)
+
+  field
+    lunit : ∀ { a b }     { x : a ⇒ b }                             → id ∘ x ~ x
+    runit : ∀ { a b }     { x : a ⇒ b }                             → x ∘ id ~ x
+    assoc : ∀ { a b c d } { x : c ⇒ d } { y : b ⇒ c } { z : a ⇒ b } → x ∘ (y ∘ z) ~ (x ∘ y) ∘ z
 
 _⇒_ : Set → Set → Set
 a ⇒ b = a → b
 
-cat⇒ : cat _⇒_ exteq
+cat⇒ : category _⇒_
 cat⇒ = record
   { id = λ x → x
   ; _∘_ = λ f g x → f (g x)
@@ -74,6 +80,8 @@ cat⇒ = record
   ; runit = refl
   ; assoc = refl
   }
+  where
+  instance ee = exteq
 
 data bool : Set₁
   where
@@ -86,7 +94,7 @@ data _⊃_ : bool → bool → Set
   ff : ⊥ ⊃ ⊥
   ft : ⊥ ⊃ ⊤
 
-cat⊃ : cat _⊃_ propeq
+cat⊃ : category _⊃_
 cat⊃ = record
   { id = id⊃
   ; _∘_ = _∘⊃_
@@ -95,6 +103,8 @@ cat⊃ = record
   ; assoc = assoc⊃
   }
   where
+  instance pe = propeq
+
   id⊃ : ∀ { a } → a ⊃ a
   id⊃ { ⊤ } = tt
   id⊃ { ⊥ } = ff
