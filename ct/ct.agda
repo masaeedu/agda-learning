@@ -1,4 +1,3 @@
-{-# OPTIONS --cubical #-}
 module ct.ct where
 
 open import Agda.Primitive
@@ -76,37 +75,49 @@ cat⇒ = record
   ; assoc = refl
   }
 
--- data _⊃_ { ℓ } : bool { ℓ } → bool { ℓ } → Set ℓ where
---   tt : ⊤ ⊃ ⊤
---   ff : ⊥ ⊃ ⊥
---   ft : ⊥ ⊃ ⊤
--- 
--- id⊃ : ∀ { a } → a ⊃ a
--- id⊃ { ⊤ } = tt
--- id⊃ { ⊥ } = ff
--- 
--- _∘⊃_ : ∀ { a b c } → b ⊃ c → a ⊃ b → a ⊃ c
--- tt ∘⊃ tt = tt
--- tt ∘⊃ ft = ft
--- ff ∘⊃ ff = ff
--- ft ∘⊃ ff = ft
--- 
--- lunit⊃ : ∀ { a b } { x : a ⊃ b } → id⊃ ∘⊃ x ≡ x
--- lunit⊃ {_} {_} {tt} = refl
--- lunit⊃ {_} {_} {ft} = refl
--- lunit⊃ {_} {_} {ff} = refl
--- 
--- runit⊃ : ∀ { a b } { x : a ⊃ b } → x ∘⊃ id⊃ ≡ x
--- runit⊃ {_} {_} {tt} = refl
--- runit⊃ {_} {_} {ft} = refl
--- runit⊃ {_} {_} {ff} = refl
--- 
--- assoc⊃ : ∀ { a b c d } { x : c ⊃ d } { y : b ⊃ c } { z : a ⊃ b } → x ∘⊃ (y ∘⊃ z) ≡ (x ∘⊃ y) ∘⊃ z
--- assoc⊃ {_} {_} {_} {_} {tt} {tt} {tt} = refl
--- assoc⊃ {_} {_} {_} {_} {tt} {tt} {ft} = refl
--- assoc⊃ {_} {_} {_} {_} {tt} {ft} {ff} = refl
--- assoc⊃ {_} {_} {_} {_} {ft} {ff} {ff} = refl
--- assoc⊃ {_} {_} {_} {_} {ff} {ff} {ff} = refl
--- 
--- cat⊃ : cat _⊃_
--- cat⊃ = record { id = id⊃; _∘_ = _∘⊃_; lunit = lunit⊃; runit = runit⊃; assoc = assoc⊃ }
+data bool : Set₁
+  where
+  ⊤ : bool
+  ⊥ : bool
+
+data _⊃_ : bool → bool → Set
+  where
+  tt : ⊤ ⊃ ⊤
+  ff : ⊥ ⊃ ⊥
+  ft : ⊥ ⊃ ⊤
+
+cat⊃ : cat _⊃_ propeq
+cat⊃ = record
+  { id = id⊃
+  ; _∘_ = _∘⊃_
+  ; lunit = lunit⊃
+  ; runit = runit⊃
+  ; assoc = assoc⊃
+  }
+  where
+  id⊃ : ∀ { a } → a ⊃ a
+  id⊃ { ⊤ } = tt
+  id⊃ { ⊥ } = ff
+
+  _∘⊃_ : ∀ { a b c } → b ⊃ c → a ⊃ b → a ⊃ c
+  tt ∘⊃ tt = tt
+  tt ∘⊃ ft = ft
+  ff ∘⊃ ff = ff
+  ft ∘⊃ ff = ft
+
+  lunit⊃ : ∀ { a b } { x : a ⊃ b } → id⊃ ∘⊃ x ≡ x
+  lunit⊃ {_} {_} {tt} = refl
+  lunit⊃ {_} {_} {ft} = refl
+  lunit⊃ {_} {_} {ff} = refl
+
+  runit⊃ : ∀ { a b } { x : a ⊃ b } → x ∘⊃ id⊃ ≡ x
+  runit⊃ {_} {_} {tt} = refl
+  runit⊃ {_} {_} {ft} = refl
+  runit⊃ {_} {_} {ff} = refl
+
+  assoc⊃ : ∀ { a b c d } { x : c ⊃ d } { y : b ⊃ c } { z : a ⊃ b } → x ∘⊃ (y ∘⊃ z) ≡ (x ∘⊃ y) ∘⊃ z
+  assoc⊃ {_} {_} {_} {_} {tt} {tt} {tt} = refl
+  assoc⊃ {_} {_} {_} {_} {tt} {tt} {ft} = refl
+  assoc⊃ {_} {_} {_} {_} {tt} {ft} {ff} = refl
+  assoc⊃ {_} {_} {_} {_} {ft} {ff} {ff} = refl
+  assoc⊃ {_} {_} {_} {_} {ff} {ff} {ff} = refl
