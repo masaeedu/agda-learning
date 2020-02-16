@@ -11,7 +11,7 @@ record relation (a b : Set) : Set₁ where
 
 record equivalence (a : Set) : Set₁ where
   field
-    ⦃ rel ⦄ : relation a a 
+    ⦃ rel ⦄ : relation a a
 
   open relation rel public
 
@@ -20,7 +20,7 @@ record equivalence (a : Set) : Set₁ where
     symmetry     : ∀ { x y : a } → x ~ y → y ~ x
     transitivity : ∀ { x y z : a } → y ~ z → x ~ y → x ~ z
 
-open equivalence ⦃ ... ⦄ public
+open equivalence ⦃ ... ⦄
 
 record category { k : Set₁ } (_⇒_ : k → k → Set) : Set₁
   where
@@ -35,6 +35,8 @@ record category { k : Set₁ } (_⇒_ : k → k → Set) : Set₁
     lunit : ∀ { a b }     { x : a ⇒ b }                             → id ∘ x ~ x
     runit : ∀ { a b }     { x : a ⇒ b }                             → x ∘ id ~ x
     assoc : ∀ { a b c d } { x : c ⇒ d } { y : b ⇒ c } { z : a ⇒ b } → x ∘ (y ∘ z) ~ (x ∘ y) ∘ z
+
+open category ⦃ ... ⦄
 
 -- {{{ Relations
 
