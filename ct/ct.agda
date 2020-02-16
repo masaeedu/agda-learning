@@ -66,7 +66,7 @@ propeq = record
 exteq : ∀ { a b : Set } → equivalence (a → b)
 exteq = record
   { rel = record { _~_ = _~_ }
-  ; reflexivity = reflexivity -- λ { f } { x } → refl
+  ; reflexivity = reflexivity
   ; symmetry = symmetry
   ; transitivity = transitivity
   }
