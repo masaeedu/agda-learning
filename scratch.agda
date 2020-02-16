@@ -1,4 +1,4 @@
-module hello-world where
+module scratch where
 
 -- import Relation.Binary.PropositionalEquality as Eq
 -- open Eq using (_≡_; refl)
