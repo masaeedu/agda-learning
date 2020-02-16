@@ -9,12 +9,6 @@ record relation (a b : Set) : Set₁ where
   field
     _~_ : a → b → Set
 
-proprel : { a : Set } → relation a a
-proprel = record { _~_ = _≡_ }
-
-funrel : { a b : Set } → relation (a → b) (a → b)
-funrel = record { _~_ = λ f g → ∀ { x } → f x ≡ g x }
-
 record equivalence (a : Set) : Set₁ where
   field
     ⦃ rel ⦄ : relation a a 
@@ -27,6 +21,32 @@ record equivalence (a : Set) : Set₁ where
     transitivity : ∀ { x y z : a } → y ~ z → x ~ y → x ~ z
 
 open equivalence ⦃ ... ⦄ public
+
+record category { k : Set₁ } (_⇒_ : k → k → Set) : Set₁
+  where
+  field
+    id  : { a : k } → a ⇒ a
+    _∘_ : { a b c : k } → b ⇒ c → a ⇒ b → a ⇒ c
+
+  field
+    ⦃ hom ⦄ : { a b : k } → equivalence (a ⇒ b)
+
+  field
+    lunit : ∀ { a b }     { x : a ⇒ b }                             → id ∘ x ~ x
+    runit : ∀ { a b }     { x : a ⇒ b }                             → x ∘ id ~ x
+    assoc : ∀ { a b c d } { x : c ⇒ d } { y : b ⇒ c } { z : a ⇒ b } → x ∘ (y ∘ z) ~ (x ∘ y) ∘ z
+
+-- {{{ Relations
+
+proprel : { a : Set } → relation a a
+proprel = record { _~_ = _≡_ }
+
+funrel : { a b : Set } → relation (a → b) (a → b)
+funrel = record { _~_ = λ f g → ∀ { x } → f x ≡ g x }
+
+-- }}}
+
+-- {{{ Equivalences
 
 propeq : ∀ { a } → equivalence a
 propeq = record
@@ -55,19 +75,9 @@ exteq = record
     fr = funrel
     pe = propeq
 
-record category { k : Set₁ } (_⇒_ : k → k → Set) : Set₁
-  where
-  field
-    id  : { a : k } → a ⇒ a
-    _∘_ : { a b c : k } → b ⇒ c → a ⇒ b → a ⇒ c
+-- }}}
 
-  field
-   ⦃ hom ⦄ : { a b : k } → equivalence (a ⇒ b)
-
-  field
-    lunit : ∀ { a b }     { x : a ⇒ b }                             → id ∘ x ~ x
-    runit : ∀ { a b }     { x : a ⇒ b }                             → x ∘ id ~ x
-    assoc : ∀ { a b c d } { x : c ⇒ d } { y : b ⇒ c } { z : a ⇒ b } → x ∘ (y ∘ z) ~ (x ∘ y) ∘ z
+-- {{{ Categories
 
 _⇒_ : Set → Set → Set
 a ⇒ b = a → b
@@ -131,3 +141,5 @@ cat⊃ = record
   assoc⊃ {_} {_} {_} {_} {tt} {ft} {ff} = refl
   assoc⊃ {_} {_} {_} {_} {ft} {ff} {ff} = refl
   assoc⊃ {_} {_} {_} {_} {ff} {ff} {ff} = refl
+
+-- }}}
