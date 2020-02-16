@@ -9,16 +9,18 @@ record relation (a b : Set) : Set₁ where
   field
     _~_ : a → b → Set
 
+open relation ⦃ ... ⦄
+
 record equivalence (a : Set) : Set₁ where
   field
     ⦃ rel ⦄ : relation a a
 
-  open relation rel public
+  open relation rel public renaming (_~_ to _≈_)
 
   field
-    reflexivity  : ∀ { x } → x ~ x
-    symmetry     : ∀ { x y } → x ~ y → y ~ x
-    transitivity : ∀ { x y z } → y ~ z → x ~ y → x ~ z
+    reflexivity  : ∀ { x } → x ≈ x
+    symmetry     : ∀ { x y } → x ≈ y → y ≈ x
+    transitivity : ∀ { x y z } → y ≈ z → x ≈ y → x ≈ z
 
 open equivalence ⦃ ... ⦄
 
@@ -32,19 +34,19 @@ record category { k : Set₁ } (_⇒_ : k → k → Set) : Set₁
     ⦃ hom ⦄ : ∀ { a b } → equivalence (a ⇒ b)
 
   field
-    lunit : ∀ { a b }     { x : a ⇒ b }                             → id ∘ x ~ x
-    runit : ∀ { a b }     { x : a ⇒ b }                             → x ∘ id ~ x
-    assoc : ∀ { a b c d } { x : c ⇒ d } { y : b ⇒ c } { z : a ⇒ b } → x ∘ (y ∘ z) ~ (x ∘ y) ∘ z
+    lunit : ∀ { a b }     { x : a ⇒ b }                             → id ∘ x ≈ x
+    runit : ∀ { a b }     { x : a ⇒ b }                             → x ∘ id ≈ x
+    assoc : ∀ { a b c d } { x : c ⇒ d } { y : b ⇒ c } { z : a ⇒ b } → x ∘ (y ∘ z) ≈ (x ∘ y) ∘ z
 
 open category ⦃ ... ⦄
 
 -- {{{ Relations
 
-proprel : { a : Set } → relation a a
-proprel = record { _~_ = _≡_ }
+nrel : { a : Set } → relation a a
+nrel = record { _~_ = _≡_ }
 
-funrel : { a b : Set } → relation (a → b) (a → b)
-funrel = record { _~_ = λ f g → ∀ { x } → f x ≡ g x }
+funrel : { a b : Set } → relation b b → relation (a → b) (a → b)
+funrel v = record { _~_ = let instance b = v in λ f g → ∀ { x } → f x ~ g x }
 
 -- }}}
 
@@ -57,7 +59,7 @@ propeq = record
   ; transitivity = trans
   }
   where
-  instance p = proprel
+  instance p = nrel
 
   symm : { x : Set } { a b : x } → a ≡ b → b ≡ a
   symm refl = refl
@@ -65,17 +67,16 @@ propeq = record
   trans : { x : Set } { a b c : x } → b ≡ c → a ≡ b → a ≡ c
   trans refl refl = refl
 
-exteq : ∀ { a b : Set } → equivalence (a → b)
-exteq = record
-  { rel = record { _~_ = _~_ }
+extensional : ∀ { a b : Set } → equivalence b → equivalence (a → b)
+extensional e = record
+  { rel = funrel rel
   ; reflexivity = reflexivity
-  ; symmetry = symmetry
-  ; transitivity = transitivity
+  ; symmetry = λ ab → symmetry ab
+  ; transitivity = λ bc ab → transitivity bc ab
   }
   where
   instance
-    fr = funrel
-    pe = propeq
+    eq = e
 
 -- }}}
 
@@ -86,14 +87,13 @@ a ⇒ b = a → b
 
 cat⇒ : category _⇒_
 cat⇒ = record
-  { id = λ x → x
+  { hom = extensional propeq
+  ; id = λ x → x
   ; _∘_ = λ f g x → f (g x)
   ; lunit = refl
   ; runit = refl
   ; assoc = refl
   }
-  where
-  instance ee = exteq
 
 data bool : Set₁
   where
@@ -108,7 +108,8 @@ data _⊃_ : bool → bool → Set
 
 cat⊃ : category _⊃_
 cat⊃ = record
-  { id = id⊃
+  { hom = propeq
+  ; id = id⊃
   ; _∘_ = _∘⊃_
   ; lunit = lunit⊃
   ; runit = runit⊃
