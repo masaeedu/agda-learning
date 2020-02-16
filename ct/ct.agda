@@ -84,6 +84,7 @@ extensional e = record
 
 -- {{{ Categories
 
+-- The category of typed functions
 _⇒_ : Set → Set → Set
 a ⇒ b = a → b
 
@@ -97,6 +98,7 @@ cat⇒ = record
   ; assoc = refl
   }
 
+-- The preorder of booleans
 data bool : Set₁
   where
   ⊤ : bool
