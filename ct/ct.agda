@@ -52,8 +52,9 @@ funrel v = record { _~_ = let instance b = v in λ f g → ∀ { x } → f x ~ g
 
 -- {{{ Equivalences
 
-propeq : ∀ { a } → equivalence a
-propeq = record
+-- Equivalence modulo normalization
+neq : ∀ { a } → equivalence a
+neq = record
   { reflexivity = refl
   ; symmetry = symm
   ; transitivity = trans
@@ -67,6 +68,7 @@ propeq = record
   trans : { x : Set } { a b c : x } → b ≡ c → a ≡ b → a ≡ c
   trans refl refl = refl
 
+-- Extensional equivalence given some notion of codomain equivalence
 extensional : ∀ { a b : Set } → equivalence b → equivalence (a → b)
 extensional e = record
   { rel = funrel rel
@@ -87,7 +89,7 @@ a ⇒ b = a → b
 
 cat⇒ : category _⇒_
 cat⇒ = record
-  { hom = extensional propeq
+  { hom = extensional neq
   ; id = λ x → x
   ; _∘_ = λ f g x → f (g x)
   ; lunit = refl
@@ -108,7 +110,7 @@ data _⊃_ : bool → bool → Set
 
 cat⊃ : category _⊃_
 cat⊃ = record
-  { hom = propeq
+  { hom = neq
   ; id = id⊃
   ; _∘_ = _∘⊃_
   ; lunit = lunit⊃
@@ -116,7 +118,7 @@ cat⊃ = record
   ; assoc = assoc⊃
   }
   where
-  instance pe = propeq
+  instance pe = neq
 
   id⊃ : ∀ { a } → a ⊃ a
   id⊃ { ⊤ } = tt
