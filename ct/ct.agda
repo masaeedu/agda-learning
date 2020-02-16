@@ -16,20 +16,20 @@ record equivalence (a : Set) : Set₁ where
   open relation rel public
 
   field
-    reflexivity  : ∀ { x : a } → x ~ x
-    symmetry     : ∀ { x y : a } → x ~ y → y ~ x
-    transitivity : ∀ { x y z : a } → y ~ z → x ~ y → x ~ z
+    reflexivity  : ∀ { x } → x ~ x
+    symmetry     : ∀ { x y } → x ~ y → y ~ x
+    transitivity : ∀ { x y z } → y ~ z → x ~ y → x ~ z
 
 open equivalence ⦃ ... ⦄
 
 record category { k : Set₁ } (_⇒_ : k → k → Set) : Set₁
   where
   field
-    id  : { a : k } → a ⇒ a
-    _∘_ : { a b c : k } → b ⇒ c → a ⇒ b → a ⇒ c
+    id  : ∀ { a } → a ⇒ a
+    _∘_ : ∀ { a b c } → b ⇒ c → a ⇒ b → a ⇒ c
 
   field
-    ⦃ hom ⦄ : { a b : k } → equivalence (a ⇒ b)
+    ⦃ hom ⦄ : ∀ { a b } → equivalence (a ⇒ b)
 
   field
     lunit : ∀ { a b }     { x : a ⇒ b }                             → id ∘ x ~ x
