@@ -212,3 +212,17 @@ data Id₁ : Set → Set where
 data Even' (n : ℕ) : Set where
   ezero' : n ≡ zero → Even' n
   e2succ' : { m : ℕ } → n ≡ suc (suc m) → Even' m → Even' n
+
+data Filter (A : Set) (f : A -> Bool) : Set
+  where
+  Item : (a : A) { _ : f a ≡ true } → Filter A f
+
+isEven' : ℕ → Bool
+isEven' zero = true
+isEven' (suc n) = not (isEven' n)
+
+test₁ : Filter ℕ isEven'
+test₁ = Item zero { refl }
+
+test₂ : Filter ℕ (λ x → not (isEven' x))
+test₂ = Item (suc zero) { refl }
